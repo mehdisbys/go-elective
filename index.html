@@ -1,0 +1,64 @@
+
+<!DOCTYPE html>
+<head>
+	<meta charset="utf-8">
+	<title>Test</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body>
+	<header>
+		<h1>Test</h1>
+	</header>
+	<div id='log'>
+	</div>
+	<hr>
+	<div id='log-text'>
+	</div>
+	<script>
+		var ws
+
+		function connect() {
+			ws = new WebSocket("ws://localhost/events");
+
+			ws.onopen = function() {
+				eventRecieved("CONNECTED");
+			};
+
+			ws.onmessage = function(event) {
+				eventRecievedText(event.data);
+			};
+
+			ws.onclose = function() {
+				eventRecieved("CLOSED");
+			};
+
+			ws.onerror = function() {
+				eventRecieved("ERROR");
+			};
+		}
+
+		function send(){
+			var text = document.getElementById("text");
+			ws.send(text.value);
+			eventRecieved("SENT: "+ text.value);
+		}
+
+		function eventRecieved(data){
+			console.log(data);
+			textdiv = document.createElement("div");
+			textdiv.textContent = data;
+			document.getElementById('log').appendChild(textdiv);
+		}
+
+		function eventRecievedText(data){
+			console.log(data);
+			textdiv = document.createElement("div");
+			hr = document.createElement("hr");
+			textdiv.textContent = data;
+			document.getElementById('log-text').appendChild(textdiv).appendChild(hr);
+		}
+
+		connect();
+	</script>
+</body>
+</html>
