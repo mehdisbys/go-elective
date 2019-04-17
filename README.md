@@ -17,7 +17,7 @@ Create go application with:
 * All open websocket connections should start printing a list of countries, one at a time in 0.5 second interval
 * Use the interface provided in `index.html` to print countries and `countries.txt` to populate the list
 
-![alt text](https://github.com/electivegroup/go-test/blob/master/diagram.png "Solution diagram")
+![alt text](https://github.com/electivegroup/go-test/blob/master/go-test.png "Solution diagram")
 
 ## Evaluation
 Evaluation criteria:
