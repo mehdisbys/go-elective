@@ -2,13 +2,13 @@
 
 ## Introduction
 
-The purpose of this test is to ensure you have some basic knowledge of the golang's standard http library, and that you are familiar with objects. Please don't fork repository and son't push your solution back to github. Compress compleate git solution and send it to us as zip packegege. We need to be able to look at your commits, therefore make sure to include .git in your folder.
+The purpose of this test is to ensure you have some basic knowledge of the golang's standard http library, and that you are familiar with objects. Please do not fork the repository and do not push your solution back to github. Please compress your complete git solution and send it to us as zip package. PLease ensure you include .git in your folder so that view your commits.
 
 ## Deliverable
 * Clone repository
 * Commit your solution
 * zip the folder
-* send it back to us by email
+* Send it back to Elective
 
 ## Test
 Create go application with:
@@ -20,7 +20,7 @@ Create go application with:
 ![alt text](https://github.com/electivegroup/go-test/blob/master/diagram.png "Solution diagram")
 
 ## Evaluation
-The evaluation criterium are:
+Evaluation criteria:
 
 1. Validity
 * The software must do what it is supposed to do.
@@ -34,7 +34,7 @@ The evaluation criterium are:
 
 3. Exploitability
 * The support team must be able to troubleshoot with the logs.
-* The configuration must be easy.
+* Any configuration must be easy.
 * The software must be documented.
 * The software must be easy to deploy.
 
