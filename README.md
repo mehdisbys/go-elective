@@ -1,4 +1,4 @@
-# go-test
+# Go Challenge
 
 ## Introduction
 
