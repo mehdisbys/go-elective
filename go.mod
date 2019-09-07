@@ -1,4 +1,4 @@
-module /Users/mehdi/projects/go-challenge
+module github.com/mehdisbys/go-challenge
 
 require (
 	github.com/gorilla/websocket v1.4.1

@@ -3,11 +3,9 @@ package main
 import (
 	"github.com/gorilla/websocket"
 	"github.com/julienschmidt/httprouter"
+	"github.com/mehdisbys/go-challenge/domain"
 	"log"
 	"net/http"
-	"os"
-	"os/signal"
-	"strconv"
 	"time"
 )
 
@@ -27,30 +25,33 @@ func testWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer c.Close()
-	done := make(chan struct{})
-	ticker := time.NewTicker(time.Second)
+	done := make(chan bool)
+	output := make(chan []byte)
+	ticker := time.NewTicker(time.Millisecond * 200)
+	input := []string{"a", "b", "c", "d", "e"}
 	for {
-		writeToSocket(c, done, ticker)
-	}
-}
-
-func writeToSocket(c *websocket.Conn, done chan struct{}, ticker *time.Ticker) {
-	interrupt := make(chan os.Signal, 1)
-	signal.Notify(interrupt, os.Interrupt)
-	defer ticker.Stop()
-	i := 0
-	for {
-		select {
-		case <-done:
-			return
-		case <-ticker.C:
-			err := c.WriteMessage(websocket.TextMessage, []byte(strconv.Itoa(i)))
-			if err != nil {
-				log.Println("write:", err)
-				return
+		go func(output chan []byte, done chan bool) {
+			for {
+				select {
+				case <-done:
+					c.WriteMessage(websocket.TextMessage, []byte("Bye!"))
+					if err != nil {
+						log.Println("write:", err)
+						return
+					}
+					c.Close()
+					return
+				case s := <-output:
+					err := c.WriteMessage(websocket.TextMessage, s)
+					if err != nil {
+						log.Println("write:", err)
+						return
+					}
+				}
 			}
-			i++
-		}
+		}(output, done)
+
+		domain.StreamValues(output, done, ticker, input)
 	}
 }
 
