@@ -18,7 +18,7 @@
 		var ws
 
 		function connect() {
-			ws = new WebSocket("ws://localhost/events");
+			ws = new WebSocket("ws://localhost:8080/events");
 
 			ws.onopen = function() {
 				eventRecieved("CONNECTED");
