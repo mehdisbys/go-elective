@@ -1,3 +1,41 @@
+
+##Introduction
+
+This solution aims to simplicity while being easily extensible.
+It includes :
+
+- Makefile
+- Config files for multiple environments (checked at runtime)
+- Dockerfile for easy deployment
+- Ability to easily change the duration of the ticker
+- Ability to easily change the function that processes the countries with SetProcessor() (e.g we want to print names in all caps)
+- Tests checking websockets are written to after GET "/countries" and not before
+
+#####How it can be improved :
+
+- Make use of context, assign a traceId to each request and propagate it to the logging library
+- Write live tests against a running instance (black box testing)
+- Add metrics
+- Keep track of simultaneous opened websockets
+
+#####How to run it :
+
+`make deps`
+
+`make test`
+
+`make linux-binary`
+
+`docker build -t go-elective .`
+
+`docker run -p 80:80 go-elective .`
+
+`open index.html in your browser`
+
+`hit localhost/countries in your browser`
+
+-----
+
 # Go Challenge
 
 ## Introduction

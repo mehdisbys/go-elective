@@ -8,7 +8,6 @@ import (
 	"strconv"
 
 	"github.com/mehdisbys/go-challenge/app/config"
-
 	"github.com/mehdisbys/go-challenge/app/domain"
 	"github.com/mehdisbys/go-challenge/app/server"
 )
@@ -24,9 +23,14 @@ func main() {
 	}
 
 	serve := server.NewServer(cfg.IntervalMs)
+
 	serve.LoadCountries(cfg.CountriesFile)
+
 	serve.SetProcessor(domain.StreamValues)
+
 	http.HandleFunc("/countries", serve.Start)
 	http.HandleFunc("/events", serve.SendCountries)
+
+	log.Printf("Listening on port %d", cfg.Port)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.Port), nil))
 }
