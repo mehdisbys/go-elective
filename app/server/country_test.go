@@ -1,12 +1,13 @@
 package server
 
 import (
-	`github.com/gorilla/websocket`
-	`net/http`
-	`net/http/httptest`
-	`strings`
-	`testing`
-	`time`
+	"net/http"
+	"net/http/httptest"
+	"strings"
+	"testing"
+	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 // function p should not be called because Start() was not called
@@ -19,7 +20,7 @@ func TestSendCountriesNotCalled(t *testing.T) {
 		return res
 	}
 
-	s := NewServer()
+	s := NewServer(1)
 	s.SetProcessor(p)
 
 	// Create test server with the echo handler.
@@ -52,7 +53,7 @@ func TestSendCountriesCalled(t *testing.T) {
 		return res
 	}
 
-	s := NewServer()
+	s := NewServer(1)
 	s.SetProcessor(p)
 
 	// Create test server with the echo handler.
@@ -63,7 +64,7 @@ func TestSendCountriesCalled(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(testserver.URL, "http")
 
 	// Calling Start()
-	s.Start(&httptest.ResponseRecorder{}, nil, )
+	s.Start(&httptest.ResponseRecorder{}, nil)
 
 	// Connect to the server
 	ws, _, err := websocket.DefaultDialer.Dial(u, nil)

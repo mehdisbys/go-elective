@@ -1,1 +1,3 @@
-filename: countries.txt
+countriesFile: countries.txt
+port: 8080
+intervalMs: 500

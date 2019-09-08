@@ -1,18 +1,20 @@
 package server
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
 )
 
 type Streamer interface {
-	// 	LoadCountries()
+	LoadCountries(filename string)
+	SetProcessor(processor Processor)
 	Start(w http.ResponseWriter, r *http.Request)
 	SendCountries(w http.ResponseWriter, r *http.Request)
-	SetProcessor(processor Processor)
 }
 
 type Processor func(duration time.Duration, input []string) <-chan []byte
@@ -25,7 +27,7 @@ type CountryServer struct {
 	processor Processor
 }
 
-func NewServer() Streamer {
+func NewServer(interval int) Streamer {
 	var upgrader = &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 			return true
@@ -33,9 +35,18 @@ func NewServer() Streamer {
 	return &CountryServer{
 		start:    make(chan bool),
 		upgrader: upgrader,
-		input:    []string{"a", "b", "c", "d"},
-		interval: time.Millisecond * 1000,
+		interval: time.Millisecond * time.Duration(interval),
 	}
+}
+
+func (s *CountryServer) LoadCountries(filename string) {
+	content, err := ioutil.ReadFile(filename)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	oneLine := string(content)
+	s.input = strings.Split(oneLine, "\n")
 }
 
 func (s *CountryServer) Start(w http.ResponseWriter, r *http.Request) {
