@@ -17,8 +17,10 @@ type Streamer interface {
 	SendCountries(w http.ResponseWriter, r *http.Request)
 }
 
+// Processor defines the function signature that will process the countries
 type Processor func(duration time.Duration, input []string) <-chan []byte
 
+// CountryServer implements Streamer. It synchronises websockets through a channel
 type CountryServer struct {
 	start     chan bool
 	input     []string
@@ -27,6 +29,7 @@ type CountryServer struct {
 	processor Processor
 }
 
+// NewServer returns a Streamer
 func NewServer(interval int) Streamer {
 	var upgrader = &websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
@@ -39,6 +42,7 @@ func NewServer(interval int) Streamer {
 	}
 }
 
+// LoadCountries loads the countries for later use
 func (s *CountryServer) LoadCountries(filename string) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -49,15 +53,24 @@ func (s *CountryServer) LoadCountries(filename string) {
 	s.input = strings.Split(oneLine, "\n")
 }
 
+// Start gives the signal to all handlers to start writing the countries
 func (s *CountryServer) Start(w http.ResponseWriter, r *http.Request) {
+
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+
 	close(s.start)
 	w.WriteHeader(http.StatusOK)
 }
 
+// SetProcessor sets the Processor that will return countries at different intervals
 func (s *CountryServer) SetProcessor(processor Processor) {
 	s.processor = processor
 }
 
+// SendCountries is a handler that will write the countries in a websocket.
+// It calls the server's Processor function and writes the output.
 func (s *CountryServer) SendCountries(w http.ResponseWriter, r *http.Request) {
 	c, err := s.upgrader.Upgrade(w, r, nil)
 

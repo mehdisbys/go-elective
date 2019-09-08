@@ -15,6 +15,7 @@ import (
 
 func main() {
 
+	// Load config - it will exit if we are missing required values
 	cfg, err := config.NewConfig()
 
 	if err != nil {

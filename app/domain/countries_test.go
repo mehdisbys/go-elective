@@ -1,9 +1,10 @@
 package domain
 
 import (
-	"github.com/go-test/deep"
 	"testing"
 	"time"
+
+	"github.com/go-test/deep"
 )
 
 func TestStreamValues(t *testing.T) {
@@ -45,6 +46,7 @@ func TestStreamValues(t *testing.T) {
 	}
 }
 
+// getValues is a helper to append chan values into a slice
 func getValues(c <-chan []byte) [][]byte {
 	var r [][]byte
 

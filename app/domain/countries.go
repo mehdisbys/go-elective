@@ -1,9 +1,11 @@
 package domain
 
 import (
+	"log"
 	"time"
 )
 
+// StreamValues returns elements contained in `strs` at `d` intervals
 func StreamValues(d time.Duration, strs []string) <-chan []byte {
 
 	if d == 0 {
@@ -21,6 +23,7 @@ func StreamValues(d time.Duration, strs []string) <-chan []byte {
 		for _, s := range strs {
 			select {
 			case <-ticker.C:
+				log.Printf("Sending [%s] to websocket", s)
 				rc <- []byte(s)
 			}
 		}

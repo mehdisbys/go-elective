@@ -1,5 +1,8 @@
 deps:
 		go mod vendor
 
-test:
+lint:
+		golangci-lint run --config=.golangci.yml ./...
+
+test:	lint
 		go test -cover -failfast ./...

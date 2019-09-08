@@ -64,7 +64,7 @@ func TestSendCountriesCalled(t *testing.T) {
 	u := "ws" + strings.TrimPrefix(testserver.URL, "http")
 
 	// Calling Start()
-	s.Start(&httptest.ResponseRecorder{}, nil)
+	s.Start(&httptest.ResponseRecorder{}, &http.Request{Method: http.MethodGet})
 
 	// Connect to the server
 	ws, _, err := websocket.DefaultDialer.Dial(u, nil)
