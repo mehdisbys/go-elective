@@ -1,5 +1,5 @@
 
-##Introduction
+## Introduction
 
 This solution aims to simplicity while being easily extensible.
 It includes :
@@ -7,18 +7,19 @@ It includes :
 - Makefile
 - Config files for multiple environments (checked at runtime)
 - Dockerfile for easy deployment
+- Ability to change the port the server is listening to
 - Ability to easily change the duration of the ticker
 - Ability to easily change the function that processes the countries with SetProcessor() (e.g we want to print names in all caps)
 - Tests checking websockets are written to after GET "/countries" and not before
 
-#####How it can be improved :
+##### How it can be improved :
 
 - Make use of context, assign a traceId to each request and propagate it to the logging library
 - Write live tests against a running instance (black box testing)
-- Add metrics
+- Add metrics (e.g response time, size of data, ...)
 - Keep track of simultaneous opened websockets
 
-#####How to run it :
+##### How to run it :
 
 `make deps`
 

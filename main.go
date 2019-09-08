@@ -26,6 +26,7 @@ func main() {
 
 	serve.LoadCountries(cfg.CountriesFile)
 
+	// The function that will send countries to the websocket
 	serve.SetProcessor(domain.StreamValues)
 
 	http.HandleFunc("/countries", serve.Start)

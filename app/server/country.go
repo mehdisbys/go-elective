@@ -20,7 +20,7 @@ type Streamer interface {
 // Processor defines the function signature that will process the countries
 type Processor func(duration time.Duration, input []string) <-chan []byte
 
-// CountryServer implements Streamer. It synchronises websockets through a channel
+// CountryServer implements Streamer. It synchronises websockets through the start channel
 type CountryServer struct {
 	start     chan bool
 	input     []string
@@ -42,7 +42,7 @@ func NewServer(interval int) Streamer {
 	}
 }
 
-// LoadCountries loads the countries for later use
+// LoadCountries loads the countries for later use by websockets
 func (s *CountryServer) LoadCountries(filename string) {
 	content, err := ioutil.ReadFile(filename)
 	if err != nil {
@@ -86,7 +86,9 @@ func (s *CountryServer) SendCountries(w http.ResponseWriter, r *http.Request) {
 		}
 	}()
 
+	// wait for channel to be closed by a call to Start()
 	<-s.start
+	// Range over response channel from processor
 	for s := range s.processor(s.interval, s.input) {
 		err := c.WriteMessage(websocket.TextMessage, s)
 		if err != nil {
