@@ -2,62 +2,71 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/julienschmidt/httprouter"
-	"github.com/mehdisbys/go-challenge/domain"
+	"github.com/mehdisbys/go-challenge/app/domain"
 	"log"
 	"net/http"
 	"time"
 )
 
-func Countries(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
+type Streamer interface {
+	// 	LoadCountries()
+	Start(w http.ResponseWriter, r *http.Request)
+	SendCountries(w http.ResponseWriter, r *http.Request)
+}
+
+type Server struct {
+	start    chan bool
+	input    []string
+	upgrader *websocket.Upgrader
+	interval time.Duration
+}
+
+func NewServer() Streamer {
+	var upgrader = &websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true
+		}}
+	return &Server{
+		start:    make(chan bool),
+		upgrader: upgrader,
+		input:    []string{"a", "b", "c", "d"},
+		interval: time.Millisecond * 1000,
+	}
+}
+
+func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
+	close(s.start)
 	w.WriteHeader(http.StatusOK)
 }
 
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	}}
+func (s *Server) SendCountries(w http.ResponseWriter, r *http.Request) {
+	c, err := s.upgrader.Upgrade(w, r, nil)
 
-func testWs(w http.ResponseWriter, r *http.Request) {
-	c, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Print("upgrade:", err)
 		return
 	}
-	defer c.Close()
-	done := make(chan bool)
-	output := make(chan []byte)
-	ticker := time.NewTicker(time.Millisecond * 200)
-	input := []string{"a", "b", "c", "d", "e"}
-	for {
-		go func(output chan []byte, done chan bool) {
-			for {
-				select {
-				case <-done:
-					c.WriteMessage(websocket.TextMessage, []byte("Bye!"))
-					if err != nil {
-						log.Println("write:", err)
-						return
-					}
-					c.Close()
-					return
-				case s := <-output:
-					err := c.WriteMessage(websocket.TextMessage, s)
-					if err != nil {
-						log.Println("write:", err)
-						return
-					}
-				}
-			}
-		}(output, done)
 
-		domain.StreamValues(output, done, ticker, input)
+	defer func() {
+		err := c.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	<-s.start
+	for s := range domain.StreamValues(s.interval, s.input) {
+		err := c.WriteMessage(websocket.TextMessage, s)
+		if err != nil {
+			log.Println("write:", err)
+			return
+		}
 	}
 }
 
 func main() {
-	router := httprouter.New()
-	router.GET("/countries", Countries)
-	http.HandleFunc("/events", testWs)
+	serve := NewServer()
+	http.HandleFunc("/countries", serve.Start)
+	http.HandleFunc("/events", serve.SendCountries)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
