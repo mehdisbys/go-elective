@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/gorilla/websocket"
-	"github.com/mehdisbys/go-challenge/app/domain"
+	`github.com/mehdisbys/go-challenge/app/domain`
 	"log"
 	"net/http"
 	"time"
@@ -12,13 +12,17 @@ type Streamer interface {
 	// 	LoadCountries()
 	Start(w http.ResponseWriter, r *http.Request)
 	SendCountries(w http.ResponseWriter, r *http.Request)
+	SetProcessor(processor Processor)
 }
 
+type Processor func(duration time.Duration, input []string) <-chan []byte
+
 type Server struct {
-	start    chan bool
-	input    []string
-	upgrader *websocket.Upgrader
-	interval time.Duration
+	start     chan bool
+	input     []string
+	upgrader  *websocket.Upgrader
+	interval  time.Duration
+	processor Processor
 }
 
 func NewServer() Streamer {
@@ -39,6 +43,10 @@ func (s *Server) Start(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func (s *Server) SetProcessor(processor Processor) {
+	s.processor = processor
+}
+
 func (s *Server) SendCountries(w http.ResponseWriter, r *http.Request) {
 	c, err := s.upgrader.Upgrade(w, r, nil)
 
@@ -55,7 +63,7 @@ func (s *Server) SendCountries(w http.ResponseWriter, r *http.Request) {
 	}()
 
 	<-s.start
-	for s := range domain.StreamValues(s.interval, s.input) {
+	for s := range s.processor(s.interval, s.input) {
 		err := c.WriteMessage(websocket.TextMessage, s)
 		if err != nil {
 			log.Println("write:", err)
@@ -66,6 +74,7 @@ func (s *Server) SendCountries(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	serve := NewServer()
+	serve.SetProcessor(domain.StreamValues)
 	http.HandleFunc("/countries", serve.Start)
 	http.HandleFunc("/events", serve.SendCountries)
 	log.Fatal(http.ListenAndServe(":8080", nil))
